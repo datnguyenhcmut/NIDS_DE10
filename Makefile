@@ -66,12 +66,13 @@ gen-tests:
 	@echo "✓ Test generation complete"
 	@echo ""
 
-# HTML Report generation
+# HTML Report generation (requires compiled design)
 .PHONY: report
 report:
 	@echo "==================================================================="
 	@echo "  Generating HTML Verification Report"
 	@echo "==================================================================="
+	@if not exist work (echo Error: Work library not found. Run 'make compile' first. && exit /b 1)
 	@if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
 	@python scripts/generate_html_report.py
 	@echo ""

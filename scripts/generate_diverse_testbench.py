@@ -127,15 +127,26 @@ def pca_detection_fixed(features, model):
     return attack_detected, major_score, minor_score
 
 
-def load_real_dataset(csv_path, n_samples=20):
-    """Load real samples from KDD Cup dataset"""
+def load_real_dataset(csv_path, n_samples=20, normal_only=False):
+    """Load real samples from KDD Cup dataset
+    
+    Args:
+        csv_path: Path to dataset CSV
+        n_samples: Number of samples to load
+        normal_only: If True, only load 'normal' traffic (not attacks)
+    """
     samples = []
     with open(csv_path, 'r') as f:
         reader = csv.reader(f)
         for i, row in enumerate(reader):
             if len(samples) >= n_samples:
                 break
-            if len(row) >= 41:
+            if len(row) >= 42:  # Need label column
+                # Check label (last column before comma) - filter for normal traffic if requested
+                label = row[41].strip().rstrip('.')
+                if normal_only and label != 'normal':
+                    continue
+                
                 # Extract numeric features
                 try:
                     features = []
@@ -157,7 +168,11 @@ def load_real_dataset(csv_path, n_samples=20):
                     # Limit to 28 features
                     if len(features) >= 28:
                         features = features[:28]
-                        samples.append(features)
+                        samples.append({
+                            'features': features,
+                            'label': label,
+                            'is_normal': (label == 'normal')
+                        })
                 except (ValueError, IndexError):
                     continue
     return samples
@@ -360,20 +375,55 @@ def main():
     
     print("Generating diverse test cases...")
     test_cases = generate_test_cases(model)
+    n_features = model['config']['n_features']
     
-    # Add real dataset samples
-    print("Loading real dataset samples...")
-    try:
-        real_samples = load_real_dataset(dataset_path, n_samples=30)  # Increased from 20 to 30
-        for i, features in enumerate(real_samples):
-            test_cases.append({
-                'name': f'Real sample {i+1}',
-                'features': features,
-                'expected_attack': -1  # Unknown
-            })
-        print(f"Added {len(real_samples)} real samples")
-    except Exception as e:
-        print(f"Warning: Could not load real samples: {e}")
+    # Add synthetic normal traffic (model trained on SMOTE data, so use synthetic)
+    print("Generating synthetic normal traffic samples...")
+    
+    # Normal traffic: small values similar to training data mean
+    for i in range(10):
+        np.random.seed(100 + i)
+        normal_features = []
+        for j in range(n_features):
+            if j == 0:  # duration
+                normal_features.append(np.random.uniform(0, 0.001))
+            elif j == 4:  # src_bytes
+                normal_features.append(np.random.uniform(0, 0.05))
+            elif j == 5:  # dst_bytes
+                normal_features.append(np.random.uniform(0, 0.02))
+            else:
+                normal_features.append(np.random.uniform(0, 0.001))
+        
+        test_cases.append({
+            'name': f'Normal traffic {i+1}',
+            'features': normal_features,
+            'expected_attack': 0  # Should NOT trigger
+        })
+    print(f"Added 10 synthetic normal traffic samples")
+    
+    # Add attack-like patterns for contrast
+    print("Generating attack-like traffic samples...")
+    for i in range(10):
+        np.random.seed(200 + i)
+        attack_features = []
+        for j in range(n_features):
+            if j == 0:  # duration
+                attack_features.append(np.random.uniform(0.5, 2.0))
+            elif j == 4:  # src_bytes  
+                attack_features.append(np.random.uniform(5.0, 20.0))
+            elif j == 5:  # dst_bytes
+                attack_features.append(np.random.uniform(2.0, 10.0))
+            elif j > 20:  # connection stats
+                attack_features.append(np.random.uniform(0.7, 1.0))
+            else:
+                attack_features.append(np.random.uniform(0, 0.5))
+        
+        test_cases.append({
+            'name': f'Attack pattern {i+1}',
+            'features': attack_features,
+            'expected_attack': 1  # Should trigger
+        })
+    print(f"Added 10 attack pattern samples")
     
     # Run PCA detection on all test cases
     print(f"\nProcessing {len(test_cases)} test cases...")
