@@ -66,6 +66,15 @@ gen-tests:
 	@echo "✓ Test generation complete"
 	@echo ""
 
+# Generate memory files for FPGA
+.PHONY: gen-mem
+gen-mem:
+	@echo "==================================================================="
+	@echo "  Generating Memory Files for FPGA"
+	@echo "==================================================================="
+	@python scripts/generate_mem_files.py
+	@echo ""
+
 # HTML Report generation (requires compiled design)
 .PHONY: report
 report:

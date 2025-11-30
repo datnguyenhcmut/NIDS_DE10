@@ -1,0 +1,11 @@
+Test_ID,Name,Expected_Attack,Major_Score,Minor_Score,Memory_Start_Addr
+0,All zeros,0,174,0,0
+1,Small values,0,31877,0,28
+2,Large src_bytes,1,51738738,0,56
+3,High connection rate,1,3199175,0,84
+4,Failed logins,1,12835174,7,112
+5,Boundary value,0,319983539,0,140
+6,Random normal,0,7787958,0,168
+7,Random attack,1,539306504,0,196
+8,Max positive values,1,250225544,0,224
+9,Very small values,0,174,0,252
