@@ -1,0 +1,58 @@
+# Quartus Settings File for DE10-Standard (Cyclone V SoC)
+# Device: 5CSXFC6D6F31C6
+
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CSXFC6D6F31C6
+set_global_assignment -name TOP_LEVEL_ENTITY top_pipeline_wrapper
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:00:00  OCTOBER 14, 2025"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+
+# Design files
+
+# Pin assignments for DE10-Standard
+# Clock
+set_location_assignment PIN_AF14 -to clk
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clk -entity top_pipeline
+
+# Reset (KEY[0])
+set_location_assignment PIN_AA14 -to rst_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to rst_n -entity top_pipeline
+
+# Attack LED (LEDR[0])
+set_location_assignment PIN_AA24 -to attack_detected
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to attack_detected -entity top_pipeline
+
+# Timing constraints
+
+# Compilation settings
+set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+
+# Resource settings
+set_global_assignment -name AUTO_RAM_RECOGNITION ON
+set_global_assignment -name AUTO_ROM_RECOGNITION ON
+set_global_assignment -name DSP_BLOCK_BALANCING "LOGIC ELEMENTS"
+
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -entity top_pipeline -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -entity top_pipeline -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -entity top_pipeline -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -entity top_pipeline -section_id Top
+set_global_assignment -name SYSTEMVERILOG_FILE ../src/top_pipeline_wrapper.sv
+set_global_assignment -name SDC_FILE nids.sdc
+set_global_assignment -name SYSTEMVERILOG_FILE ../src/top_pipeline.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../src/pca_detector.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../src/pca_coeffs_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../src/fem.sv
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
